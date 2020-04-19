@@ -4,7 +4,7 @@
   "description": "A simple peer-to-peer audio, video sharing application build based on core web RTC",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
