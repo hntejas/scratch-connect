@@ -1,0 +1,323 @@
+body{
+    margin: 0;
+    padding: 0;
+    background-color: #222222;
+    color: white;
+    font-family: 'Baloo Paaji 2', cursive;
+    font-size: 1.3rem;
+}
+
+.main-content{
+    margin: 0 auto 0 auto;
+    margin-top: 10%;
+    width: max-content;
+    max-width: 80%;
+}
+
+.application-container{
+    margin: 0 auto 0 auto;
+    margin-top: 2%;
+    max-width: 80%;
+    padding: 0;
+}
+
+.video-application-section{
+    width: 60vw;
+    height: 60vh;
+    background-color: #f4efef;
+    margin: 0 auto 0 auto;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.remote-video-display{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.client-video-display{
+    z-index: 3;
+    border: black;
+    position: absolute;
+    width: 28%;
+    height: 27%;
+    bottom: 0.5%;
+    right: 0.5%;
+    border-radius: 5px;
+    background-color: #222222;
+    cursor: move;
+    transition: transform .2s ease-in-out;
+    object-fit:contain ;
+}
+
+.application-actions{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    margin: auto;    
+    text-align: center;
+    display: block;
+}
+
+.welcome-message{        
+    text-align: center;
+    margin: 10px;
+    line-height: 40px;
+    font-size: 35px;
+}
+
+.app-feature-description{
+    text-align: center;
+    line-height: 30px;
+}
+
+.app-features-list{
+    margin: auto;
+    max-width: max-content;
+    text-align: left;
+}
+
+.join-form{
+    margin: auto;
+    margin-top: 50px;
+    width: max-content;
+    text-align: center;
+}
+
+.join-call-form{
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+}
+
+.roomname-input{
+    display: block;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 25px;
+    height: 35px;
+    font-size: 18px;
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    background-color: white;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+    font-family: 'Baloo Paaji 2', cursive;
+    margin: auto;
+    margin-top: 20%;
+}
+
+.submit-room-btn{
+    display: block;
+    opacity: 1;
+    margin-left: 50%;
+    border: none;
+    margin: 25px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 520;
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    background-color: rgb(58, 140, 248);
+    color: white;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+    font-family: 'Baloo Paaji 2', cursive;
+    height: 40px;
+    width: 20%;
+    min-width: max-content;
+    margin: auto;
+    margin-top: 25px;
+}
+
+.username-input{
+    display: block;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 25px;
+    height: 35px;
+    font-size: 18px;
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    background-color: white;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+    font-family: 'Baloo Paaji 2', cursive;
+}
+
+.join-now-btn  {
+    opacity: 1;
+    margin-left: 50%;
+    border: none;
+    margin: 25px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 520;
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    background-color: rgb(58, 140, 248);
+    color: white;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+    font-family: 'Baloo Paaji 2', cursive;
+    height: 40px;
+    width: 20%;
+    min-width: max-content;
+}
+
+.start-call-btn,.join-call-btn  {
+    opacity: 1;
+    margin-left: 50%;
+    border: none;
+    margin: 25px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 520;
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    background-color: rgb(58, 140, 248);
+    color: white;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+    font-family: 'Baloo Paaji 2', cursive;
+    height: 40px;
+    width: 20%;
+    min-width: max-content;
+}
+
+.start-call-btn span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+  
+.start-call-btn span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+  }
+  
+.start-call-btn:hover span {
+    padding-right: 25px;
+  }
+  
+.start-call-btn:hover span:after {
+    opacity: 1;
+    right: 0;
+  }
+
+
+  .join-call-btn span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+  
+.join-call-btn span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+  }
+  
+.join-call-btn:hover span {
+    padding-right: 25px;
+  }
+  
+.join-call-btn:hover span:after {
+    opacity: 1;
+    right: 0;
+  }
+
+  .lds-ring {
+    display: inline-block;
+    position: absolute;
+    left: 46.5%;
+    top: 46.5%;
+    width: 80px;
+    height: 80px;
+  }
+  .lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border: 8px solid rgb(77, 77, 77);
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: rgb(77, 77, 77) transparent transparent transparent;
+  }
+  .lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+  }
+  .lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+  }
+  @keyframes lds-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+
+  #snackbar {
+      margin-top: 25px;
+    margin: auto;
+    width: max-content;
+    max-width: 30vw;
+    visibility: hidden; /* Hidden by default. Visible on click */
+    min-width: max-content; /* Set a default minimum width */
+    background-color: #333; /* Black background color */
+    color: #fff; /* White text color */
+    text-align: center; /* Centered text */
+    border-radius: 2px; /* Rounded borders */
+    padding: 16px; /* Padding */
+    z-index: 1; /* Add a z-index if needed */
+    bottom: 30px; /* 30px from the bottom */
+  }
+  
+  /* Show the snackbar when clicking on a button (class added with JavaScript) */
+  #snackbar.show {
+    visibility: visible; /* Show the snackbar */
+    /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+    However, delay the fade out process for 2.5 seconds */
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 5s;
+    animation: fadein 0.5s, fadeout 0.5s 5s;
+  }
+  
+  /* Animations to fade the snackbar in and out */
+  @-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+  }
+  
+  @keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+  }
+  
+  @-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+  }
+  
+  @keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+  }
+  

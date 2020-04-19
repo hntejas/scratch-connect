@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Paaji+2&display=swap" rel="stylesheet">
+    <title>Scratch Connect</title>
+</head>
+<body>    
+    <div class="home-container">
+        <section id="room_registration">
+            <div class="main-content">
+                <p class="welcome-message">Hello there, Welcome to Scratch Connect</p>
+                <div class="app-feature-description">
+                    <span>Experience the elagance of peer-to-peer connectivity</span>
+                    <p>Explore the variety of features:</p> 
+                    <ul class="app-features-list">
+                        <li>Audio Call</li>
+                        <li>Video Call</li>
+                        <li>Screen Sharing</li>
+                    </ul>               
+                </div>
+                <div class="join-form">
+                    <input type="text" id="username" class="username-input" placeholder="Enter a room name">  
+                    <button id="join-now" class="join-now-btn">Start Now</button>              
+                </div>
+            </div>
+        </section>
+        <section id="room_conference" hidden>
+            <div class="application-container">
+                <p style="text-align: center;">Conference section</p>
+                <div  class="video-application-section">
+                    <div class="application-actions" id="call_action_toolbar">
+                        <button class="start-call-btn" id="start_call_btn"><span>Start Call</span></button>
+                        <button class="join-call-btn" id="join_call_btn"><span>Join Call</span></button>                        
+                    </div>
+                    <video id="remote-video-display" class="remote-video-display"></video>
+                    <video id="client-video-display" class="client-video-display" muted></video>
+                    <div id="join_call_form" class="join-call-form">
+                        <input type="text" id="roomname_to_call" class="roomname-input" placeholder="Enter a room name">  
+                        <button id="join_room_btn" class="submit-room-btn">Join Call</button>              
+                    </div>
+                    <div id="loader" class="lds-ring" ><div></div><div></div><div></div><div></div>
+                </div>
+                <div class="toolbar-section"></div>
+            </div>            
+        </section>
+        <div id="snackbar"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="index.js"></script>    
+</body>
+</html>
