@@ -5,6 +5,7 @@ body{
     color: white;
     font-family: 'Baloo Paaji 2', cursive;
     font-size: 1.3rem;
+    overflow: hidden;
 }
 
 .main-content{
@@ -274,7 +275,6 @@ body{
     }
   }
 
-
   #snackbar {
       margin-top: 25px;
     margin: auto;
@@ -298,6 +298,25 @@ body{
     However, delay the fade out process for 2.5 seconds */
     -webkit-animation: fadein 0.5s, fadeout 0.5s 5s;
     animation: fadein 0.5s, fadeout 0.5s 5s;
+  }
+
+  @media only screen and (max-width: 768px) {
+    .application-container{
+      max-width: 95%;
+    }
+    .video-application-section{
+      width: 80vw;
+    }
+  }
+
+  @media only screen and (max-width: 500px) {
+    .application-container{
+      max-width: 95%;
+    }
+    .video-application-section{
+      width: 95vw;
+      height: 75vh;
+    }
   }
   
   /* Animations to fade the snackbar in and out */

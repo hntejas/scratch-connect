@@ -11,11 +11,36 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join_room", (room_to_join) => {
-    socket.join(room_to_join);
+    let existingRooms = io.sockets.adapter.rooms;
+    const isRoomHosted = !!existingRooms[room_to_join];
+    if (!isRoomHosted) {
+      socket.emit("invalid_room", "No such user room exists");
+    } else {
+      socket.join(room_to_join);
+    }
+  });
+
+  socket.on("validate_room_to_join", (room_to_join) => {
+    let existingRooms = io.sockets.adapter.rooms;
+    const isRoomHosted = !!existingRooms[room_to_join];
+    if (!isRoomHosted) {
+      socket.emit("invalid_room_to_join", "No such user room exists");
+    } else {
+      socket.emit("valid_room_to_join");
+    }
+  });
+
+  socket.on("validate_new_room", (room_name) => {
+    let existingRooms = io.sockets.adapter.rooms;
+    const isRoomHosted = !!existingRooms[room_name];
+    if (isRoomHosted) {
+      socket.emit("invalid_room_to_create", "Room name is already taken");
+    } else {
+      socket.emit("valid_room_to_create");
+    }
   });
 
   socket.on("rtc-connect", (data) => {
-    console.log("data", data);
     if (data.hasOwnProperty("offer")) {
       socket.to(data.room).emit("rtc-connect", { offer: data.offer });
     } else if (data.hasOwnProperty("iceCandidate")) {
