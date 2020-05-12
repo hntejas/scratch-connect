@@ -6,6 +6,7 @@
     <link href="./styles.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+Paaji+2&display=swap" rel="stylesheet">
     <title>Scratch Connect</title>
+    <script src="https://use.fontawesome.com/f42914e791.js"></script>
 </head>
 <body>    
     <div class="home-container">
@@ -30,7 +31,7 @@
         <section id="room_conference" hidden>
             <div class="application-container">
                 <p style="text-align: center;">Conference section</p>
-                <div  class="video-application-section">
+                <div  class="video-application-section" id="video_app_section">
                     <div class="application-actions" id="call_action_toolbar">
                         <button class="start-call-btn" id="start_call_btn"><span>Start Call</span></button>
                         <button class="join-call-btn" id="join_call_btn"><span>Join Call</span></button>                        
@@ -42,12 +43,17 @@
                         <button id="join_room_btn" class="submit-room-btn">Join Call</button>              
                     </div>
                     <div id="loader" class="lds-ring" ><div></div><div></div><div></div><div></div>
-                </div>
-                <div class="toolbar-section"></div>
-            </div>            
+                </div>   
+                <div class="toolbar-section" id="actions-toolbar" hidden>
+                    <i class="fa fa-microphone-slash"></i>
+                    <i class="fa fa-phone" id="hangup_call"></i>
+                    <i class="fa fa-video-camera" id="toggle_video"></i>
+                    <i class="fa fa-tv"></i>
+                </div>                
+            </div>                  
         </section>
         <div id="snackbar"></div>
-    </div>
+    </div>    
     <script src="/socket.io/socket.io.js"></script>
     <script src="index.js"></script>    
 </body>

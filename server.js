@@ -40,6 +40,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("end-call", (room_name) => {
+    socket.to(room_name).emit("end-call");
+  });
+
   socket.on("rtc-connect", (data) => {
     if (data.hasOwnProperty("offer")) {
       socket.to(data.room).emit("rtc-connect", { offer: data.offer });

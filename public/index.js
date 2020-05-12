@@ -2,6 +2,8 @@ const ROOM_JOIN_BTN = document.getElementById("join-now");
 const ROOM_USERNAME_INPUT = document.getElementById("username");
 const ROOM_REGISTRATION_SECTION = document.getElementById("room_registration");
 const ROOM_CONFERENCE_SECTION = document.getElementById("room_conference");
+const VIDEO_APP_SECTION = document.getElementById("video_app_section");
+const ACTION_TOOL_BAR = document.getElementById("actions-toolbar");
 const START_CALL_BTN = document.getElementById("start_call_btn");
 const JOIN_CALL_BTN = document.getElementById("join_call_btn");
 const JOIN_ROOM_BTN = document.getElementById("join_room_btn");
@@ -11,12 +13,14 @@ const CLIENT_VIDEO_ELEMENT = document.getElementById("client-video-display");
 const REMOTE_VIDEO_ELEMENT = document.getElementById("remote-video-display");
 const TOOLBAR_SECTION = document.getElementById("call_action_toolbar");
 const JOIN_CALL_FORM = document.getElementById("join_call_form");
+const TOGGLE_VIDEO = document.getElementById("toggle_video");
+const HANGUP_CALL = document.getElementById("hangup_call");
 const sections = {
   room_registration: ROOM_REGISTRATION_SECTION,
   room_conference: ROOM_CONFERENCE_SECTION,
 };
 const mediaConstraints = {
-  video: true,
+  video: false,
   audio: true,
 };
 const stunConfiguration = {
@@ -34,6 +38,7 @@ let peer;
 let offer;
 let MEDIA_STREAM = new MediaStream();
 let REMOTE_STREAM = new MediaStream();
+let isInCall = false;
 dragElement(CLIENT_VIDEO_ELEMENT);
 toggleLoader(false);
 toggleJoinCallForm(false);
@@ -73,10 +78,67 @@ JOIN_ROOM_BTN.addEventListener("click", () => {
   socket.emit("validate_room_to_join", ROOM_TO_JOIN);
 });
 
+VIDEO_APP_SECTION.addEventListener("mouseover", () => {
+  if (isInCall) {
+    ACTION_TOOL_BAR.style.visibility = "visible";
+  }
+});
+
+HANGUP_CALL.addEventListener("click", () => {
+  socket.emit("end-call", ROOM_TO_JOIN);
+  endCall();
+});
+
+// ACTION_TOOL_BAR.addEventListener("mouseover", () => {
+//   ACTION_TOOL_BAR.style.visibility = "visible";
+// });
+
+// ACTION_TOOL_BAR.addEventListener("mouseleave", () => {
+//   ACTION_TOOL_BAR.style.visibility = "visible";
+// });
+
+VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
+  ACTION_TOOL_BAR.style.visibility = "hidden";
+});
+
+VIDEO_APP_SECTION.addEventListener("touchend", () => {
+  if (isInCall) {
+    ACTION_TOOL_BAR.style.visibility =
+      ACTION_TOOL_BAR.style.visibility == "hidden" ? "visible" : "hidden";
+  }
+});
+
+VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
+  ACTION_TOOL_BAR.style.visibility = "hidden";
+});
+
+TOGGLE_VIDEO.addEventListener("click", () => {
+  mediaConstraints.video = !mediaConstraints.video;
+  navigator.mediaDevices.getUserMedia(mediaConstraints).then((stream) => {
+    const videoTracks = stream.getVideoTracks();
+    if (videoTracks.length > 0) {
+      console.log(`Using video device: ${videoTracks[0].label}`);
+    }
+    MEDIA_STREAM.addTrack(videoTracks[0]);
+    CLIENT_VIDEO_ELEMENT.srcObject = null;
+    CLIENT_VIDEO_ELEMENT.srcObject = MEDIA_STREAM;
+    CLIENT_VIDEO_ELEMENT.play();
+    recreateOffer(videoTracks[0], MEDIA_STREAM);
+  });
+});
+
+async function recreateOffer(videoTrack, MEDIA_STREAM) {
+  peer.addTrack(videoTrack, MEDIA_STREAM);
+  offer = await peer.createOffer();
+  await peer.setLocalDescription(offer);
+  socket.emit("rtc-connect", { room: ROOM_TO_JOIN, offer: offer });
+}
+
 async function initiatePeerConnection() {
   peer = new RTCPeerConnection(stunConfiguration);
-  peer.addStream(MEDIA_STREAM);
-  console.log(peer);
+  MEDIA_STREAM.getTracks().forEach((track) =>
+    peer.addTrack(track, MEDIA_STREAM)
+  );
   offer = await peer.createOffer();
   await peer.setLocalDescription(offer);
 
@@ -96,12 +158,13 @@ async function initiatePeerConnection() {
   peer.addEventListener("connectionstatechange", (event) => {
     if (peer.connectionState === "connected") {
       toggleLoader(false);
+      isInCall = true;
     }
     console.log(peer.connectionState);
     if (peer.connectionState == "disconnected") {
       displayMessage("Oops, user has disconnected");
       REMOTE_VIDEO_ELEMENT.load();
-      resetCallState();
+      endCall();
     }
   });
   peer.addEventListener("iceconnectionstatechange", (event) => {
@@ -111,10 +174,7 @@ async function initiatePeerConnection() {
     }
     if (peer.iceConnectionState == "disconnected") {
       displayMessage("Oops, user has disconnected");
-      peer.close();
-      peer = undefined;
-      REMOTE_VIDEO_ELEMENT.load();
-      resetCallState();
+      endCall();
     }
   });
 }
@@ -147,12 +207,16 @@ function initiateSocketListeners() {
     initiatePeerConnection();
   });
   socket.on("invalid_room_to_join", (message) => {
-    resetCallState();
+    endCall();
     displayMessage(message);
   });
   socket.on("valid_room_to_join", () => {
     socket.emit("join_room", ROOM_TO_JOIN);
     initiateCall();
+  });
+  socket.on("end-call", () => {
+    console.log("endcall");
+    endCall();
   });
   socket.on("rtc-connect", async (message) => {
     if (message.offer) {
@@ -261,4 +325,19 @@ function toggleLoader(shouldDisplay) {
 
 function toggleJoinCallForm(shouldDisplay) {
   JOIN_CALL_FORM.style.display = !shouldDisplay ? "none" : "initial";
+}
+
+function endCall() {
+  peer.close();
+  isInCall = false;
+  const videoTracks = MEDIA_STREAM.getVideoTracks();
+  videoTracks.forEach((videoTrack) => {
+    videoTrack.stop();
+    MEDIA_STREAM.removeTrack(videoTrack);
+  });
+  CLIENT_VIDEO_ELEMENT.srcObject = null;
+  CLIENT_VIDEO_ELEMENT.srcObject = MEDIA_STREAM;
+  REMOTE_VIDEO_ELEMENT.srcObject = null;
+  ROOM_TO_JOIN = "";
+  toggleActionMenu(true);
 }

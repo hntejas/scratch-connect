@@ -4,8 +4,7 @@ body{
     background-color: #222222;
     color: white;
     font-family: 'Baloo Paaji 2', cursive;
-    font-size: 1.3rem;
-    overflow: hidden;
+    font-size: 1.3rem;    
 }
 
 .main-content{
@@ -298,6 +297,39 @@ body{
     However, delay the fade out process for 2.5 seconds */
     -webkit-animation: fadein 0.5s, fadeout 0.5s 5s;
     animation: fadein 0.5s, fadeout 0.5s 5s;
+  }
+
+  .toolbar-section{
+    z-index: 3;
+    display: flex;
+    visibility: hidden;
+    flex-direction: column;
+    background: #f4efef;
+    border-radius: 25px;
+    color: #1979f8;
+    width: max-content;
+    justify-content: space-evenly;
+    height: 50%;
+    position: absolute;
+    top: 25%;
+    bottom: auto;
+    padding: 15px;
+    align-items: center;
+    margin-left: 2px;
+    font-size: 1.1em;
+    border: 1px solid #b8b6b6;
+    transition: opacity 600ms ease-out;
+    width: 15px;
+  }
+
+  .fa-microphone-slash:hover, .fa-phone:hover, .fa-video-camera:hover{
+    font-size: 1.5em;
+    transition: 0.05s ease-out;
+  }
+
+  .fa-tv:hover{
+    font-size: 1.3em;
+    transition: 0.1s ease-in;
   }
 
   @media only screen and (max-width: 768px) {
