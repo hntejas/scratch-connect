@@ -61,6 +61,10 @@ body{
     display: block;
 }
 
+#snackbar{
+  max-width: 80vw;
+}
+
 .welcome-message{        
     text-align: center;
     margin: 10px;
@@ -129,6 +133,29 @@ body{
     min-width: max-content;
     margin: auto;
     margin-top: 25px;
+}
+
+.back-btn{
+  display: block;
+  opacity: 1;
+  margin-left: 50%;
+  border: none;
+  margin: 25px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 520;
+  padding-inline-start: 10px;
+  padding-inline-end: 10px;
+  background-color: red;
+  color: white;
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, .28);
+  font-family: 'Baloo Paaji 2', cursive;
+  height: 35px;
+  width: 13%;
+  min-width: max-content;
+  margin: auto;
+  margin-top: 20px;
 }
 
 .username-input{
@@ -239,8 +266,8 @@ body{
   .lds-ring {
     display: inline-block;
     position: absolute;
-    left: 46.5%;
-    top: 46.5%;
+    left: calc(50% - 40px);
+    top: calc(50% - 40px);
     width: 80px;
     height: 80px;
   }
@@ -277,10 +304,8 @@ body{
   #snackbar {
       margin-top: 25px;
     margin: auto;
-    width: max-content;
-    max-width: 30vw;
+    max-width: 80vw;
     visibility: hidden; /* Hidden by default. Visible on click */
-    min-width: max-content; /* Set a default minimum width */
     background-color: #333; /* Black background color */
     color: #fff; /* White text color */
     text-align: center; /* Centered text */
@@ -297,6 +322,14 @@ body{
     However, delay the fade out process for 2.5 seconds */
     -webkit-animation: fadein 0.5s, fadeout 0.5s 5s;
     animation: fadein 0.5s, fadeout 0.5s 5s;
+  }
+
+  input:focus{
+    outline: none;
+  }
+
+  button:focus{
+    outline: none;
   }
 
   .toolbar-section{
@@ -318,8 +351,12 @@ body{
     margin-left: 2px;
     font-size: 1.1em;
     border: 1px solid #b8b6b6;
-    transition: opacity 600ms ease-out;
+    transition: visibility 2s ease-out;
     width: 15px;
+  }
+
+  .fa-phone{
+    color: red;
   }
 
   .fa-microphone-slash:hover, .fa-phone:hover, .fa-video-camera:hover{

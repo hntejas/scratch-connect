@@ -40,8 +40,43 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("end-call", (room_name) => {
+  socket.on("validate_call_to_join", (room_name) => {
+    let existingRooms = io.sockets.adapter.rooms;
+    const doesRoomExist = !!existingRooms[room_name];
+    if (doesRoomExist) {
+      const isRoomFull = existingRooms[room_name].length >= 2;
+      if (isRoomFull) {
+        socket.emit("invalid_call_to_join", "Room is full, please try later");
+      }
+      socket.to(room_name).emit("is-call-hosted", socket.id);
+    } else {
+      socket.emit("invalid_call_to_join", "Room does not exist");
+    }
+  });
+
+  socket.on("call-status-response", (isHosted, socketIdOfRequester) => {
+    if (isHosted) {
+      socket.to(socketIdOfRequester).emit("valid_call_to_join");
+    } else {
+      socket
+        .to(socketIdOfRequester)
+        .emit("invalid_call_to_join", "Call is not hosted");
+    }
+  });
+
+  socket.on("end-call", (room_name, isHost) => {
     socket.to(room_name).emit("end-call");
+    if (!isHost) {
+      socket.leave(room_name);
+    } else {
+      let existingRooms = io.sockets.adapter.rooms;
+      let hostRoom = existingRooms[room_name];
+      let nonHostSocketId = Object.keys(hostRoom.sockets).find(
+        (socketId) => socketId != socket.id
+      );
+      io.sockets.sockets[nonHostSocketId].leave(room_name);
+    }
+    console.log(io.sockets.adapter.rooms);
   });
 
   socket.on("rtc-connect", (data) => {

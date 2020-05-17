@@ -13,14 +13,18 @@ const CLIENT_VIDEO_ELEMENT = document.getElementById("client-video-display");
 const REMOTE_VIDEO_ELEMENT = document.getElementById("remote-video-display");
 const TOOLBAR_SECTION = document.getElementById("call_action_toolbar");
 const JOIN_CALL_FORM = document.getElementById("join_call_form");
-const TOGGLE_VIDEO = document.getElementById("toggle_video");
-const HANGUP_CALL = document.getElementById("hangup_call");
+const TOGGLE_VIDEO_BTN = document.getElementById("toggle_video");
+const TOGGLE_AUDIO_BTN = document.getElementById("toggle_audio");
+const TOGGLE_SCREEN_SHARE_BTN = document.getElementById("toogle_share_screen");
+const HANGUP_CALL_BTN = document.getElementById("hangup_call");
+const BACK_BTN = document.getElementById("back_btn");
+
 const sections = {
   room_registration: ROOM_REGISTRATION_SECTION,
   room_conference: ROOM_CONFERENCE_SECTION,
 };
 const mediaConstraints = {
-  video: false,
+  video: true,
   audio: true,
 };
 const stunConfiguration = {
@@ -30,13 +34,24 @@ const stunConfiguration = {
     },
   ],
 };
+const mediaTracks = {
+  audioTrack: null,
+  videoTrack: null,
+  screenShareTrack: null,
+};
+const userCallStatus = {
+  isAudioEnabled: true,
+  isVideoEnabled: true,
+  isScreenShareEnabled: false,
+  isCallHosted: false,
+};
 
 let USER_ROOM;
 let ROOM_TO_JOIN;
 let socket = io();
 let peer;
 let offer;
-let MEDIA_STREAM = new MediaStream();
+let LOCAL_STREAM = new MediaStream();
 let REMOTE_STREAM = new MediaStream();
 let isInCall = false;
 dragElement(CLIENT_VIDEO_ELEMENT);
@@ -74,61 +89,84 @@ JOIN_CALL_BTN.addEventListener("click", () => {
 
 JOIN_ROOM_BTN.addEventListener("click", () => {
   ROOM_TO_JOIN = ROOM_TO_JOIN_INPUT.value;
-  toggleJoinCallForm(false);
-  socket.emit("validate_room_to_join", ROOM_TO_JOIN);
-});
-
-VIDEO_APP_SECTION.addEventListener("mouseover", () => {
-  if (isInCall) {
-    ACTION_TOOL_BAR.style.visibility = "visible";
+  if (ROOM_TO_JOIN === USER_ROOM) {
+    displayMessage("Please enter a valid room to join");
+  } else {
+    initiatePeerConnection();
+    socket.emit("validate_call_to_join", ROOM_TO_JOIN);
   }
 });
 
-HANGUP_CALL.addEventListener("click", () => {
-  socket.emit("end-call", ROOM_TO_JOIN);
+BACK_BTN.addEventListener("click", () => {
+  toggleJoinCallForm(false);
+  toggleActionMenu(true);
+});
+
+TOGGLE_VIDEO_BTN.addEventListener("click", () => {
+  userCallStatus.isVideoEnabled = !userCallStatus.isVideoEnabled;
+  let videoTracks = LOCAL_STREAM.getVideoTracks();
+  videoTracks.forEach((track) => {
+    track.enabled = userCallStatus.isVideoEnabled;
+  });
+  TOGGLE_VIDEO_BTN.style.color = userCallStatus.isVideoEnabled
+    ? "#1979f8"
+    : "red";
+  TOGGLE_VIDEO_BTN.title = userCallStatus.isVideoEnabled
+    ? "Turn Off Video"
+    : "Turn On Video";
+});
+
+TOGGLE_AUDIO_BTN.addEventListener("click", () => {
+  LOCAL_STREAM.getAudioTracks().forEach((track) => {
+    track.enabled = !userCallStatus.isAudioEnabled;
+    userCallStatus.isAudioEnabled = !userCallStatus.isAudioEnabled;
+  });
+  TOGGLE_AUDIO_BTN.style.color = userCallStatus.isAudioEnabled
+    ? "#1979f8"
+    : "red";
+  TOGGLE_AUDIO_BTN.title = userCallStatus.isAudioEnabled ? "Mute" : "Unmute";
+});
+
+TOGGLE_SCREEN_SHARE_BTN.addEventListener("click", () => {
+  if (userCallStatus.isScreenShareEnabled) {
+    switchVideoTrack(mediaTracks.videoTrack, LOCAL_STREAM);
+    mediaTracks.screenShareTrack.stop();
+    userCallStatus.isScreenShareEnabled = false;
+    toggleScreenShareButtonProps();
+  } else {
+    navigator.mediaDevices &&
+      navigator.mediaDevices
+        .getDisplayMedia()
+        .then((screenStream) => {
+          var screenVideoTrack = screenStream.getVideoTracks()[0];
+          mediaTracks.screenShareTrack = screenVideoTrack;
+          switchVideoTrack(screenVideoTrack, screenStream);
+          userCallStatus.isScreenShareEnabled = true;
+          toggleScreenShareButtonProps();
+          screenVideoTrack.addEventListener("ended", () => {
+            switchVideoTrack(mediaTracks.videoTrack, LOCAL_STREAM);
+            userCallStatus.isScreenShareEnabled = false;
+            toggleScreenShareButtonProps();
+          });
+        })
+        .catch((e) => {
+          displayMessage("Unable to Share");
+          console.log(e);
+        });
+  }
+});
+
+HANGUP_CALL_BTN.addEventListener("click", () => {
+  console.log(ROOM_TO_JOIN, USER_ROOM);
+  const isHost = ROOM_TO_JOIN === USER_ROOM;
+  socket.emit("end-call", ROOM_TO_JOIN, isHost);
   endCall();
 });
 
-// ACTION_TOOL_BAR.addEventListener("mouseover", () => {
-//   ACTION_TOOL_BAR.style.visibility = "visible";
-// });
-
-// ACTION_TOOL_BAR.addEventListener("mouseleave", () => {
-//   ACTION_TOOL_BAR.style.visibility = "visible";
-// });
-
-VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
-  ACTION_TOOL_BAR.style.visibility = "hidden";
-});
-
-VIDEO_APP_SECTION.addEventListener("touchend", () => {
-  if (isInCall) {
-    ACTION_TOOL_BAR.style.visibility =
-      ACTION_TOOL_BAR.style.visibility == "hidden" ? "visible" : "hidden";
-  }
-});
-
-VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
-  ACTION_TOOL_BAR.style.visibility = "hidden";
-});
-
-TOGGLE_VIDEO.addEventListener("click", () => {
-  mediaConstraints.video = !mediaConstraints.video;
-  navigator.mediaDevices.getUserMedia(mediaConstraints).then((stream) => {
-    const videoTracks = stream.getVideoTracks();
-    if (videoTracks.length > 0) {
-      console.log(`Using video device: ${videoTracks[0].label}`);
-    }
-    MEDIA_STREAM.addTrack(videoTracks[0]);
-    CLIENT_VIDEO_ELEMENT.srcObject = null;
-    CLIENT_VIDEO_ELEMENT.srcObject = MEDIA_STREAM;
-    CLIENT_VIDEO_ELEMENT.play();
-    recreateOffer(videoTracks[0], MEDIA_STREAM);
-  });
-});
-
-async function recreateOffer(videoTrack, MEDIA_STREAM) {
-  peer.addTrack(videoTrack, MEDIA_STREAM);
+async function recreateOffer() {
+  LOCAL_STREAM.getTracks().forEach((track) =>
+    peer.addTrack(track, LOCAL_STREAM)
+  );
   offer = await peer.createOffer();
   await peer.setLocalDescription(offer);
   socket.emit("rtc-connect", { room: ROOM_TO_JOIN, offer: offer });
@@ -136,12 +174,18 @@ async function recreateOffer(videoTrack, MEDIA_STREAM) {
 
 async function initiatePeerConnection() {
   peer = new RTCPeerConnection(stunConfiguration);
-  MEDIA_STREAM.getTracks().forEach((track) =>
-    peer.addTrack(track, MEDIA_STREAM)
-  );
+  LOCAL_STREAM.getTracks().forEach((track) => {
+    peer.addTrack(track, LOCAL_STREAM);
+    if (track.kind === "audio") {
+      mediaTracks.audioTrack = track;
+    }
+    if (track.kind === "video") {
+      mediaTracks.videoTrack = track;
+    }
+  });
   offer = await peer.createOffer();
   await peer.setLocalDescription(offer);
-
+  userCallStatus.isCallHosted = true;
   peer.onicecandidate = function (event) {
     if (event.candidate) {
       socket.emit("rtc-connect", {
@@ -157,6 +201,7 @@ async function initiatePeerConnection() {
   });
   peer.addEventListener("connectionstatechange", (event) => {
     if (peer.connectionState === "connected") {
+      setupUIHandlers();
       toggleLoader(false);
       isInCall = true;
     }
@@ -170,6 +215,7 @@ async function initiatePeerConnection() {
   peer.addEventListener("iceconnectionstatechange", (event) => {
     console.log("icestate", peer.iceConnectionState);
     if (peer.iceConnectionState === "connected") {
+      ACTION_TOOL_BAR.style.visibility = "visible";
       toggleLoader(false);
     }
     if (peer.iceConnectionState == "disconnected") {
@@ -181,6 +227,7 @@ async function initiatePeerConnection() {
 
 async function initiateCall() {
   socket.on("rtc-connect", async (message) => {
+    console.log(message);
     if (message.answer) {
       const remoteDesc = new RTCSessionDescription(message.answer);
       await peer.setRemoteDescription(remoteDesc);
@@ -203,8 +250,8 @@ function initiateSocketListeners() {
       sections.room_registration,
       sections.room_conference
     );
-    socket.emit("new_room", USER_ROOM);
     initiatePeerConnection();
+    socket.emit("new_room", USER_ROOM);
   });
   socket.on("invalid_room_to_join", (message) => {
     endCall();
@@ -218,14 +265,27 @@ function initiateSocketListeners() {
     console.log("endcall");
     endCall();
   });
+  socket.on("is-call-hosted", (socketIdOfRequester) => {
+    let isHosted = userCallStatus.isCallHosted;
+    socket.emit("call-status-response", isHosted, socketIdOfRequester);
+  });
+  socket.on("valid_call_to_join", () => {
+    toggleJoinCallForm(false);
+    socket.emit("join_room", ROOM_TO_JOIN);
+    initiateCall();
+  });
+  socket.on("invalid_call_to_join", (message) => {
+    displayMessage(message);
+  });
   socket.on("rtc-connect", async (message) => {
+    console.log("onreceive", message);
     if (message.offer) {
       peer.setRemoteDescription(new RTCSessionDescription(message.offer));
       const answer = await peer.createAnswer();
       await peer.setLocalDescription(answer);
       socket.emit("rtc-connect", { room: ROOM_TO_JOIN, answer: answer });
     }
-    if (message.iceCandidate) {
+    if (message.iceCandidate && peer.currentRemoteDescription) {
       try {
         await peer.addIceCandidate(message.iceCandidate);
       } catch (e) {
@@ -245,21 +305,36 @@ function initiateConferenceSection(currentSection, nextSection) {
       CLIENT_VIDEO_ELEMENT.srcObject = stream;
       CLIENT_VIDEO_ELEMENT.play();
       REMOTE_VIDEO_ELEMENT.srcObject = REMOTE_STREAM;
-      MEDIA_STREAM = stream;
+      LOCAL_STREAM = stream;
     })
     .catch((error) => {
       console.error("Error accessing media devices.", error);
     });
 }
 
+function endCall() {
+  window.location.reload(); // To be fixed
+  peer.close();
+  isInCall = false;
+  peer = null;
+  REMOTE_VIDEO_ELEMENT.srcObject = null;
+  ROOM_TO_JOIN = "";
+  toggleActionMenu(true);
+  console.log(peer);
+}
+
 function createRoom(roomName) {
   socket.emit("new_room", roomName);
 }
 
-function resetCallState() {
-  peer = undefined;
-  ROOM_TO_JOIN = "";
-  toggleActionMenu(true);
+function switchVideoTrack(track, stream) {
+  let videoSender = peer
+    .getSenders()
+    .find((sender) => sender.track.kind == "video");
+  videoSender.replaceTrack(track);
+
+  CLIENT_VIDEO_ELEMENT.srcObject = stream;
+  CLIENT_VIDEO_ELEMENT.play();
 }
 
 function dragElement(elmnt) {
@@ -312,7 +387,7 @@ function displayMessage(message) {
   // After 10 seconds, remove the show class from DIV
   setTimeout(function () {
     x.className = x.className.replace("show", "");
-  }, 10000);
+  }, 3000);
 }
 
 function toggleActionMenu(shouldDisplay) {
@@ -327,17 +402,43 @@ function toggleJoinCallForm(shouldDisplay) {
   JOIN_CALL_FORM.style.display = !shouldDisplay ? "none" : "initial";
 }
 
-function endCall() {
-  peer.close();
-  isInCall = false;
-  const videoTracks = MEDIA_STREAM.getVideoTracks();
-  videoTracks.forEach((videoTrack) => {
-    videoTrack.stop();
-    MEDIA_STREAM.removeTrack(videoTrack);
+function setupUIHandlers() {
+  VIDEO_APP_SECTION.addEventListener("mouseover", () => {
+    if (isInCall) {
+      ACTION_TOOL_BAR.style.visibility = "visible";
+    }
   });
-  CLIENT_VIDEO_ELEMENT.srcObject = null;
-  CLIENT_VIDEO_ELEMENT.srcObject = MEDIA_STREAM;
-  REMOTE_VIDEO_ELEMENT.srcObject = null;
-  ROOM_TO_JOIN = "";
-  toggleActionMenu(true);
+
+  VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
+    ACTION_TOOL_BAR.style.visibility = "hidden";
+  });
+
+  VIDEO_APP_SECTION.addEventListener("touchend", () => {
+    if (isInCall) {
+      ACTION_TOOL_BAR.style.visibility =
+        ACTION_TOOL_BAR.style.visibility == "hidden" ? "visible" : "hidden";
+    }
+  });
+
+  VIDEO_APP_SECTION.addEventListener("mouseleave", () => {
+    ACTION_TOOL_BAR.style.visibility = "hidden";
+  });
 }
+
+function toggleScreenShareButtonProps() {
+  console.log(userCallStatus);
+  TOGGLE_SCREEN_SHARE_BTN.style.color = userCallStatus.isScreenShareEnabled
+    ? "red"
+    : "#1979f8";
+  TOGGLE_SCREEN_SHARE_BTN.title = userCallStatus.isScreenShareEnabled
+    ? "Stop Screen Share"
+    : "Share Screen";
+}
+
+// ACTION_TOOL_BAR.addEventListener("mouseover", () => {
+//   ACTION_TOOL_BAR.style.visibility = "visible";
+// });
+
+// ACTION_TOOL_BAR.addEventListener("mouseleave", () => {
+//   ACTION_TOOL_BAR.style.visibility = "visible";
+// });

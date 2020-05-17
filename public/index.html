@@ -40,15 +40,16 @@
                     <video id="client-video-display" class="client-video-display" muted></video>
                     <div id="join_call_form" class="join-call-form">
                         <input type="text" id="roomname_to_call" class="roomname-input" placeholder="Enter a room name">  
-                        <button id="join_room_btn" class="submit-room-btn">Join Call</button>              
+                        <button id="join_room_btn" class="submit-room-btn">Join Call</button>
+                        <button id="back_btn" class="back-btn">Back</button>              
                     </div>
                     <div id="loader" class="lds-ring" ><div></div><div></div><div></div><div></div>
                 </div>   
                 <div class="toolbar-section" id="actions-toolbar" hidden>
-                    <i class="fa fa-microphone-slash"></i>
-                    <i class="fa fa-phone" id="hangup_call"></i>
-                    <i class="fa fa-video-camera" id="toggle_video"></i>
-                    <i class="fa fa-tv"></i>
+                    <i class="fa fa-microphone-slash" id="toggle_audio" title="Mute"></i>
+                    <i class="fa fa-phone" id="hangup_call" title="Disconnect"></i>
+                    <i class="fa fa-video-camera" id="toggle_video" title="Turn Off Video"></i>
+                    <i class="fa fa-tv" id="toogle_share_screen" title="Share Screen"></i>
                 </div>                
             </div>                  
         </section>
