@@ -47,8 +47,9 @@ io.on("connection", (socket) => {
       const isRoomFull = existingRooms[room_name].length >= 2;
       if (isRoomFull) {
         socket.emit("invalid_call_to_join", "Room is full, please try later");
+      } else {
+        socket.to(room_name).emit("is-call-hosted", socket.id);
       }
-      socket.to(room_name).emit("is-call-hosted", socket.id);
     } else {
       socket.emit("invalid_call_to_join", "Room does not exist");
     }

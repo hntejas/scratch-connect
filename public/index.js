@@ -276,6 +276,8 @@ function initiateSocketListeners() {
   });
   socket.on("invalid_call_to_join", (message) => {
     displayMessage(message);
+    toggleJoinCallForm(false);
+    toggleActionMenu(true);
   });
   socket.on("rtc-connect", async (message) => {
     console.log("onreceive", message);
